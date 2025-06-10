@@ -97,7 +97,7 @@ const username = params.get('username');
 let imagesByDay = {};
 async function loadImagesAndGenerateCalendar() {
   try {
-    const response = await fetch(`http://localhost:8000/get-user-images?username=${encodeURIComponent(username)}`);
+    const response = await fetch(`https://cats.amypark.xyz/get-user-images?username=${encodeURIComponent(username)}`);
     imagesByDay = await response.json();
 
     today = currentDate.toISOString().slice(0, 10);
