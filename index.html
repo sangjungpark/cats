@@ -1,0 +1,274 @@
+<!-- Genereated with help from ChatGPT (1-137, 155-161, 165-173, 203-220, 248-262)-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cats</title>
+  <style>
+    body {
+      background: #f0f4f8;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .quiz-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      padding: 30px 40px;
+      max-width: 1000px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      font-size: 28px;
+      color: #333;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .question-block {
+      margin-bottom: 25px;
+    }
+
+    .question-block p {
+      font-size: 18px;
+      margin-bottom: 12px;
+      color: #444;
+    }
+
+    .option-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .option-row label {
+      display: flex;
+      align-items: center;
+      font-size: 16px;
+      color: #333;
+      cursor: pointer;
+    }
+
+    .option-row input[type="radio"] {
+      margin-right: 8px;
+    }
+
+    .user-auth {
+      margin-top: 30px;
+      display: flex;
+      gap: 20px;
+      justify-content: flex-start;
+    }
+
+    .user-auth label {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #555;
+    }
+
+    .user-auth input {
+      margin-top: 6px;
+      padding: 8px 12px;
+      font-size: 1rem;
+      border: 1.8px solid #ddd;
+      border-radius: 8px;
+      transition: border-color 0.3s ease;
+    }
+
+    .user-auth input:focus {
+      outline: none;
+      border-color: #4a90e2;
+      box-shadow: 0 0 8px rgba(74, 144, 226, 0.4);
+    }
+
+    button {
+      background: #4a90e2;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.3s ease;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background: #357abd;
+    }
+
+    .result {
+      margin-top: 25px;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-card">
+    <h1>Quick Quiz</h1>
+    <form id="quiz-form">
+      <div id="quiz-container"></div>
+      <!-- Username and Password fields -->
+      <div class="user-auth" style="margin-top: 20px;">
+        <label>
+          Username:
+          <input type="text" name="username" id="username" required>
+        </label>
+        <label style="margin-left: 20px;">
+          Password:
+          <input type="password" name="password" id="password" required>
+        </label>
+      </div>
+      <button type="submit">Submit Quiz</button>
+    </form>
+    <div id="calendar-container" style="margin-top: 30px;"></div>
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const loggedInUser = params.get('username');
+    const pass_sha256 = params.get('pass');
+    if (loggedInUser && pass_sha256 ) {
+      if (login(loggedInUser, pass_sha256)) {
+        // Hide login fields
+        window.addEventListener('DOMContentLoaded', () => {
+          document.querySelector('.user-auth').style.display = 'none';
+          document.getElementById('username').required = false;
+          document.getElementById('password').required = false;
+        });
+
+        // Display calendar iframe
+        const calendarContainer = document.getElementById('calendar-container');
+        const iframe = document.createElement('iframe');
+        iframe.src = `calendar.html?username=${encodeURIComponent(loggedInUser)}`;
+        iframe.style.width = '100%';
+        iframe.style.height = '600px';
+        iframe.style.border = '1px solid #ccc';
+        iframe.style.borderRadius = '8px';
+        iframe.style.marginTop = '20px';
+        calendarContainer.appendChild(iframe);
+      }
+    }
+
+    async function login(username, pass_sha256) {
+      const response = await fetch("http://127.0.0.1:8000/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: username, pass_sha256: pass_sha256 })
+      });
+      const result = await response.json();
+      return result.success;
+    }
+
+    async function hashPassword(password) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(password);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      return hashHex;
+    }
+
+    const questions = [
+      {
+        question: "오늘 기분은 어떠셨나요?",
+        options: ["좋음", "보통", "우울함"],
+      },
+      {
+        question: "어젯밤 잠은 잘 주무셨나요?",
+        options: ["잘 잤다", "보통이었다", "잘 못 잤다"],
+      },
+      {
+        question: "오늘 하루 동안 에너지는 어땠나요?",
+        options: ["활기찼다", "적당했다", "피곤했다"],
+      },
+      {
+        question: "오늘 집중력은 어땠나요?",
+        options: ["좋았다", "보통이었다", "나빴다"],
+      }
+    ];
+
+    const quizContainer = document.getElementById("quiz-container");
+
+    questions.forEach((q, index) => {
+      const block = document.createElement("div");
+      block.className = "question-block";
+      block.innerHTML = `
+        <p>${q.question}</p>
+        <div class="option-row">
+          ${q.options.map((opt, i) => `
+            <label>
+              <input type="radio" name="question${index}" value="${i}">
+              ${opt}
+            </label>
+          `).join('')}
+        </div>
+      `;
+      quizContainer.appendChild(block);
+    });
+
+
+
+    document.getElementById("quiz-form").addEventListener("submit", async function(event) {
+      event.preventDefault();
+
+      const answers = questions.map((q, index) => {
+        const selected = document.querySelector(`input[name="question${index}"]:checked`);
+        return {
+          question: q.question,
+          question_index: index,
+          answer: selected ? parseInt(selected.value) : 1
+        };
+      });
+
+      // Get username & password values
+      const username = loggedInUser ? loggedInUser : document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
+      const passwordHashed = await hashPassword(password);
+
+      const payload = {
+        date: new Date().toISOString().slice(0, 10),
+        responses: answers,
+        username: username,
+        pass_sha256: passwordHashed
+      }
+
+      const url = loggedInUser ? "http://localhost:8000/submit-quiz" : "http://localhost:8000/new-user"
+      // Send answers to FastAPI backend
+      fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      })
+      .then(res => {
+        if (!res.ok) {
+          return res.json().then(err => { throw new Error(err.detail); });
+        }
+        return res.json();
+      })
+      .then(data => {
+        console.log("Server response:", data);
+          window.location.href = `index.html?username=${encodeURIComponent(username)}&pass=${encodeURIComponent(passwordHashed)}&t=${Date.now()}`;
+      })
+      .catch(error => {
+        document.getElementById("result").innerText = "Error: " + error.message;
+      });
+    });
+  </script>
+</body>
+</html>
+

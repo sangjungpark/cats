@@ -1,0 +1,98 @@
+<!-- Genereated with help from ChatGPT (1-52, 66-73)-->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cats-login</title>
+    <!-- <link href="css/style.css" rel="stylesheet"> -->
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f0f2f5;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+      .login-box {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        width: 300px;
+      }
+      .login-box h2 {
+        margin-bottom: 1rem;
+      }
+      .login-box input {
+        width: 100%;
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      .login-box button {
+        width: 100%;
+        padding: 0.5rem;
+        background: #007BFF;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .login-box button:hover {
+        background: #0056b3;
+      }
+      .message {
+        margin-top: 1rem;
+        text-align: center;
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-box">
+      <h2>Login</h2>
+      <input type="text" id="username" placeholder="Username" />
+      <input type="password" id="password" placeholder="Password" />
+      <button onclick="login()">Log In</button>
+      <div class="message" id="message"></div>
+      <a href="index.html" style="display: block; text-align: center; margin-top: 1rem; color: #007BFF; text-decoration: none;">
+        새로 트래커 시작 및 계정 만들기
+      </a>
+    </div>
+
+    <script>
+      async function hashPassword(password) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(password);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        return hashHex;
+      }
+
+      async function login() {
+        const username = document.getElementById("username").value;
+        const pass = document.getElementById("password").value;
+        const msg = document.getElementById("message");
+        const pass_sha256 = await hashPassword(pass)
+
+        const response = await fetch("http://127.0.0.1:8000/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: username, pass_sha256: pass_sha256 })
+        });
+
+        const result = await response.json();
+        msg.textContent = result.message;
+        msg.style.color = result.success ? "green" : "red";
+
+        if (result.success) {
+          window.location.href = `index.html?username=${encodeURIComponent(username)}&pass=${encodeURIComponent(pass_sha256)}`;
+        }
+      }
+    </script>
+  </body>
+</html>
