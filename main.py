@@ -1,4 +1,4 @@
-# Generated with help from ChatGPT (1-72, 127-153)
+# Generated with help from ChatGPT (1-74, 132-158)
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -53,6 +53,7 @@ class QuizSubmission(BaseModel):
     responses: List[Answer]
     username: str
     pass_sha256: str
+    
 
 @app.post("/submit-quiz")
 def submit_quiz(data: QuizSubmission):
@@ -94,8 +95,12 @@ def create_user_submit_quiz(data: QuizSubmission):
         create_composite_image([response.answer + 1 for response in data.responses], cat_file)
         return {"message":f"result saved to {data_to_save['date']}.json"}
 
-@app.get("/get-user-images/")
-def get_images(username: str = Query(...)):
+class CheckUser(BaseModel):
+    username: str
+
+@app.post("/get-user-images/")
+def get_images(data: CheckUser):
+    username = data.username
     png_files = list((Path('data') / username).glob('*.png'))
     png_dict = {png.name[:-4]: str(png) for png in png_files}
     return png_dict
