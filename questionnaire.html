@@ -262,7 +262,7 @@
       })
       .then(data => {
         console.log("Server response:", data);
-          window.location.href = `index.html?username=${encodeURIComponent(username)}&pass=${encodeURIComponent(passwordHashed)}&t=${Date.now()}`;
+          window.location.href = `questionnaire.html?username=${encodeURIComponent(username)}&pass=${encodeURIComponent(passwordHashed)}&t=${Date.now()}`;
       })
       .catch(error => {
         document.getElementById("result").innerText = "Error: " + error.message;
