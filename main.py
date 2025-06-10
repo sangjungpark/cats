@@ -102,7 +102,7 @@ class CheckUser(BaseModel):
 def get_images(data: CheckUser):
     username = data.username
     png_files = list((Path('data') / username).glob('*.png'))
-    png_dict = {png.name[:-4]: str(png) for png in png_files}
+    png_dict = {png.name[:-4]: f"https://cats.amypark.xyz/images/{username}/{png.name}" for png in png_files}
     return png_dict
     
 
@@ -156,3 +156,8 @@ def create_composite_image(indices, output_path='output.png'):
 
     # Save the final image
     composite.save(output_path)
+
+@app.get("/images/{username}/{filename}")
+async def get_image(username: str, filename: str):
+    file_path = Path("data") / username / filename
+    return FileResponse(file_path)
