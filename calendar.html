@@ -98,7 +98,7 @@ let imagesByDay = {};
 async function loadImagesAndGenerateCalendar() {
   try {
     const payload = {'username': username}
-    const response = await fetch("http://localhost:8000/get-user-images", {
+    const response = await fetch("https://cats.amypark.xyz/get-user-images", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
