@@ -1,4 +1,4 @@
-<!-- Genereated with help from ChatGPT (1-69, 90-100, 124-167)-->
+<!-- Genereated with help from ChatGPT (1-69, 90-100, 131-174)-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -97,7 +97,14 @@ const username = params.get('username');
 let imagesByDay = {};
 async function loadImagesAndGenerateCalendar() {
   try {
-    const response = await fetch(`https://cats.amypark.xyz/get-user-images?username=${encodeURIComponent(username)}`);
+    const payload = {'username': username}
+    const response = await fetch("http://localhost:8000/get-user-images", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
     imagesByDay = await response.json();
 
     today = currentDate.toISOString().slice(0, 10);
