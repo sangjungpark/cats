@@ -163,7 +163,7 @@ function generateCalendar(date) {
     const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     if (imagesByDay[dateKey]) {
       const img = document.createElement('img');
-      img.src = imagesByDay[dateKey];
+      img.src = imagesByDay[dateKey] + '?t=' + currentDate.now();
       dayBox.appendChild(img);
     }
 
