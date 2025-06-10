@@ -114,7 +114,7 @@ async function loadImagesAndGenerateCalendar() {
     if (today in imagesByDay) {
       todayCatPath = imagesByDay[today];
       const img = document.createElement('img');
-      img.src = todayCatPath;
+      img.src = todayCatPath + '?t=' + currentDate.getTime();
       img.style.maxWidth = '50%'
       img.style.display = 'block';
       img.style.margin = '0 auto';
@@ -163,7 +163,7 @@ function generateCalendar(date) {
     const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     if (imagesByDay[dateKey]) {
       const img = document.createElement('img');
-      img.src = imagesByDay[dateKey] + '?t=' + currentDate.now();
+      img.src = imagesByDay[dateKey] + '?t=' + currentDate.getTime();
       dayBox.appendChild(img);
     }
 
